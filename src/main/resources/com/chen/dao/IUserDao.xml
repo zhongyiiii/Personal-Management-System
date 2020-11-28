@@ -1,0 +1,377 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chen.dao.IUserDao">
+	<!-- 注册 -->
+	<insert id="saveUser" parameterType="user">
+		insert into user(number,password, role_id, phone, createdate, username,
+		remark)
+		values(#{number},#{password},#{role_id},#{phone},#{createdate},#{username},#{remark})
+	</insert>
+	
+	<!-- 查找用户 用户登录 -->
+	<select id="findUser" resultType="user" >
+		select * from user where (number=#{number} or username=#{number}) and password=#{password}
+	</select>
+	
+	<!-- 查询user总记录条数 -->
+	<select id="getAllAccounts" resultType="int">
+		select count(*) from user	
+	</select>
+	
+	<!-- 查询dept总记录条数  -->
+	<select id="getAllDepartments" resultType="int">
+		select count(*) from dept	
+	</select>
+	
+	<!-- 添加部门  -->
+	<insert id="addDepartment">
+		insert into dept(did, dname, dremark) values(#{did}, #{dname}, #{dremark})
+	</insert>
+	
+	<!-- 查询dept所有记录 -->
+	<select id="findAllDepartments" resultType="dept">
+		select * from dept where 1=1
+		<if test="did != null">
+            	and did like concat ('%',#{did},'%')
+        </if>
+        <if test="dname != null">
+            	and dname like concat ('%',#{dname},'%')
+        </if>
+	</select>
+	
+	<!-- 查询job总记录条数 -->
+	<select id="getAllJob" resultType="int">
+		select count(*) from job
+	</select>
+	
+	<!--添加job  -->
+	<insert id="addJob">
+		insert into job(jid, jname, jremark) values(#{jid}, #{jname}, #{jremark})
+	</insert>
+	
+	<!--查询job所有记录   -->
+	<select id="findAllJobs" resultType="job">
+		select * from job where 1=1
+		<if test="jid != null">
+            	and jid like concat ('%',#{jid},'%')
+        </if>
+        <if test="jname != null">
+            	and jname like concat ('%',#{jname},'%')
+        </if>
+	</select>
+	
+	
+	<!-- 查询role总记录条数 -->
+	<select id="getAllRole" resultType="Integer">
+		select count(*) from role
+	</select>
+	
+	<!--添加role  -->
+	<insert id="addRole">
+		insert into role(rid, rname, rremark) values(#{rid}, #{rname}, #{rremark})
+	</insert>
+	
+	<!--查询role所有记录   -->
+	<select id="findAllRoles" resultType="role">
+		select * from role where 1=1
+		<if test="rid != null">
+            	and rid like concat ('%',#{rid},'%')
+        </if>
+        <if test="rname != null">
+            	and rname like concat ('%',#{rname},'%')
+        </if>
+	</select>
+	
+	<!-- 得到job和dept -->
+	<select id="findDepts" resultType="dept">
+		select * from dept
+	</select>
+	<select id="findJobs" resultType="job">
+		select * from job
+	</select>
+	
+	<!-- 得到employee的总记录数 -->
+	<select id="getAllEmployee" resultType="Integer">
+		select count(*) from employee
+	</select>
+	
+	<!-- 添加employee -->
+	<insert id="addEmployee">
+		insert into employee(id, dept_id, job_id, name, card_id, address, post_code, tel, phone, qq_num, email, sex, party, birthday, race, education, speciality, hobby,remark, create_date )
+			values(#{id}, #{dept_id}, #{job_id}, #{name}, #{card_id}, #{address}, #{post_code}, #{tel}, #{phone}, #{qq_num}, #{email}, #{sex},#{party}, #{birthday}, #{race}, #{education}, #{speciality},#{hobby},#{remark}, #{create_date})
+	</insert>
+	
+	
+	<!-- 根据roleId查询roleName -->
+	<select id="getRoleNameByRoleId" resultType="String">
+		select rname from role where rid = #{roleId}
+	</select>
+	
+	<!-- 根据一页显示多少内容pageSize，和当前页currentPage来分页 -->
+	<select id="splitPages4User" resultType="user">
+		<!-- select * from user limit (currentPage-1)*pageSize,pageSize -->
+		select * from user limit ${(currentPage - 1)*pageSize},#{pageSize}
+	</select>
+	
+	<!-- 得到role， 使页面的角色下拉框能动态变化 -->
+	<select id="findRoles" resultType="role" >
+		select * from role
+	</select>
+	
+	<!-- 根据条件来查询user的记录数 -->
+	<select id="getAllAccountsByCondition" resultType="int" >
+		select count(*) from user where 1=1  
+		<if test="number != null">
+            	and number like concat ('%',#{number},'%')
+        </if>
+        <if test="username != null">
+            	and username like concat ('%',#{username},'%')
+        </if>
+        <if test="phone != null">
+            	and phone like concat ('%',#{phone},'%')
+        </if>
+        <if test="role_id != null">
+            	and role_id like concat ('%',#{role_id},'%')
+        </if>
+	</select>
+	
+	
+	<!-- 根据条件来查询user,而且分页 -->
+	<select id="splitPages4UserByCondition" resultType="user">
+		select * from user where 1=1  
+		<if test="number != null">
+            	and number like concat ('%',#{number},'%')
+        </if>
+        <if test="username != null">
+            	and username like concat ('%',#{username},'%')
+        </if>
+        <if test="phone != null">
+            	and phone like concat ('%',#{phone},'%')
+        </if>
+        <if test="role_id != null">
+            	and role_id like concat ('%',#{role_id},'%')
+        </if>
+        <!-- <if test="currentPage != "></if> -->
+        	limit ${(currentPage - 1)*pageSize},#{pageSize}
+	</select>
+	
+	
+	<!-- 根据numbers批量删除 -->
+	<delete id="delManyUsers">
+		delete from user
+		<where>
+			<if test="numbers != null and numbers.size()>0">
+				<foreach collection="numbers" open=" and number in (" close=")" item="number" separator=",">
+					#{number}
+				</foreach>
+			</if>
+		</where>
+	</delete>
+	
+	<!-- 根据number查询user -->
+	<select id="returnUserInfo" resultType="user">
+		select * from user where number=#{number}
+	</select>
+	
+	<!-- 修改用户信息 -->
+	<update id="editUserInfo" parameterType="user">
+		UPDATE USER SET username=#{username},password=#{password},role_id=#{role_id},phone=#{phone}, remark=#{remark} WHERE number=#{number}
+	</update>
+	
+	<!-- 根据条件来查询employee的记录数 -->
+	<select id="getAllEmployeesByCondition" resultType="int" >
+		select count(*) from employee where 1=1  
+		<if test="id != null">
+            	and id like concat ('%',#{id},'%')
+        </if>
+        <if test="name != null">
+            	and name like concat ('%',#{name},'%')
+        </if>
+        <if test="phone != null">
+            	and phone like concat ('%',#{phone},'%')
+        </if>
+        <if test="deptId != null">
+            	and dept_id like concat ('%',#{deptId},'%')
+        </if>
+        <if test="jobId != null">
+            	and job_id like concat ('%',#{jobId},'%')
+        </if>
+        
+	</select>
+	
+	<!-- 根据条件和当前页码pageSize， currentPage来查询employee -->
+	
+	<select id="splitPages4EmployeeByCondition" resultType="employee">
+		select * from employee where 1=1  
+		<if test="id != null">
+            	and id like concat ('%',#{id},'%')
+        </if>
+        <if test="name != null">
+            	and name like concat ('%',#{name},'%')
+        </if>
+        <if test="phone != null">
+            	and phone like concat ('%',#{phone},'%')
+        </if>
+        <if test="deptId != null">
+            	and dept_id like concat ('%',#{deptId},'%')
+        </if>
+        <if test="jobId != null">
+            	and job_id like concat ('%',#{jobId},'%')
+        </if>
+        <!-- <if test="currentPage != "></if> -->
+        	limit ${(currentPage - 1)*pageSize},#{pageSize}
+	</select>
+	
+	<!-- 根据deptId来获得deptName -->
+	<select id="getDeptNameByDeptId" resultType="String">
+		select dname from dept where did = #{dept_id}
+	</select>
+	
+	<!-- 根据JobId来获得jobName -->
+	<select id="getJobNameByJobId" resultType="String">
+		select jname from job where jid = #{job_id}
+	</select>
+	
+	
+	<!-- 根据id批量删除 -->
+	<delete id="delManyEmployees">
+		delete from employee
+		<where>
+			<if test="idz != null and idz.size()>0">
+				<foreach collection="idz" open=" and id in (" close=")" item="id" separator=",">
+					#{id}
+				</foreach>
+			</if>
+		</where>
+	</delete>
+	
+	<!-- 根据id查询employee -->
+	<select id="returnEmployeeInfo" resultType="employee">
+		select * from employee where id=#{id}
+	</select>
+	
+	<!-- 修改employee信息 -->
+	<update id="editEmployeeInfo" parameterType="employee">
+		update employee set  dept_id=#{dept_id} ,job_id=#{job_id}, name=#{name}, card_id=#{card_id}, address=#{address}, post_code=#{post_code}, tel=#{tel}, phone=#{phone}, qq_num=#{qq_num}, email=#{email}, sex=#{sex}, party=#{party}, birthday=#{birthday}, race=#{race}, education=#{education}, speciality=#{speciality}, hobby=#{hobby},remark=#{remark} 
+			where id=#{id}
+	</update>
+	
+	
+	<!-- 得到uploadfile数据表的总记录数 -->
+	<select id="getAllFiles" resultType="int">
+		select count(*) from uploadfile
+	</select>
+	
+	
+	<!-- 添加上传的文件到uploadfile -->
+	<insert id="uploadFile">
+		insert into uploadfile(id, uploadName, fileName, uploadDate, title, savePath) values
+			(#{id}, #{uploadName}, #{fileName}, #{uploadDate}, #{title}, #{savePath})
+	</insert>
+	
+	<!-- 添加notice -->
+	<insert id="addNotice">
+		insert into notice(id, username, theme, title, content, remark, create_time) values(#{id}, #{username}, #{theme}, #{title}, #{content}, #{remark}, #{create_time})
+	</insert>
+	
+	<!--查询notice所有记录   -->
+	<select id="searchNoticeByCondition" resultType="notice">
+		select * from notice where 1=1
+		<if test="title != null">
+            	and title like concat ('%',#{title},'%')
+        </if>
+        <if test="theme != null">
+            	and theme like concat ('%',#{theme},'%')
+        </if>
+        
+        <if test="username != null">
+            	and username like concat ('%',#{username},'%')
+        </if>
+	</select>
+	
+	<!-- 根据id查询notice -->
+	<select id="findNoticeById" resultType="notice">
+		select * from notice where id = #{id}
+	</select>
+	
+	<!-- 得到notice的总记录数 -->
+	<select id="getAllNotices" resultType="int">
+		select count(*) from notice
+	</select>
+	
+	<!-- 根据条件查询notice -->
+	<select id="findNoticesByOrder" resultType="notice">
+		select * from notice order by create_time desc limit #{fromIndex},#{toIndex}
+	</select>
+	
+	
+	<!-- 根据条件来查询uploadfile的记录数 -->
+	<select id="getAllFilesByCondition" resultType="int" >
+		select count(*) from uploadfile where 1=1  
+		<if test="uploadName != null">
+            	and uploadName like concat ('%',#{uploadName},'%')
+        </if>
+        <if test="fromIndexDatetime != null">
+            	
+            	and uploadDate between #{fromIndexDatetime} and #{toIndexDatetime}
+        </if>
+        
+        
+	</select>
+	
+	<!-- 根据条件和当前页码pageSize， currentPage来查询employee -->
+	
+	<select id="splitPages4FileByCondition" resultType="uploadfile">
+		select * from uploadfile where 1=1  
+		<if test="uploadName != null">
+            	and uploadName like concat ('%',#{uploadName},'%')
+        </if>
+        <if test="fromIndexDatetime != null">
+            	and uploadDate between #{fromIndexDatetime} and #{toIndexDatetime}
+        </if>
+        		order by uploadDate desc
+        		limit ${(currentPage - 1)*pageSize},#{pageSize}
+	</select>
+	
+	<!-- 根据id查询uploadfile -->
+	<select id="getUploadFileById" resultType="uploadfile">
+		select * from uploadfile where id=#{id}
+	</select>
+	
+	<!-- 根据id批量删除 uploadfile-->
+	<select id="findUploadFilesByIds" resultType="uploadfile">
+		select * from uploadfile
+		<where>
+			<if test="idz != null and idz.size()>0">
+				<foreach collection="idz" open=" and id in (" close=")" item="id" separator=",">
+					#{id}
+				</foreach>
+			</if>
+		</where>
+	</select>
+	
+	
+	
+	<!-- 根据id批量删除 uploadfile-->
+	<delete id="delManyUploadFiles">
+		delete from uploadfile
+		<where>
+			<if test="idz != null and idz.size()>0">
+				<foreach collection="idz" open=" and id in (" close=")" item="id" separator=",">
+					#{id}
+				</foreach>
+			</if>
+		</where>
+	</delete>
+	
+	<!-- 修改已经登录的用户信息 -->
+	<update id="editLoginUserInfo">
+		update user set password=#{password}, phone=#{phone}, username=#{username}, remark=#{remark} where number=#{number}
+	</update>
+	
+	<!--根据username查询user中是否已经存在  -->
+	<select id="checkUserName" resultType="int">
+		select count(*) from user where username=#{username}
+	</select>
+</mapper>
